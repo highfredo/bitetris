@@ -1,91 +1,126 @@
 import '@/styles/main.css'
 import Stats from 'stats.js'
 import music from '@/assets/tetris.mp3'
-import { BLOCK_SIZE, BOARD_HEIGHT, BOARD_WIDTH, TICK_TIME } from './consts'
 import { Game } from './Game'
 import type { Piece } from './Piece'
 
-const stats = new Stats()
-stats.dom.style.left = 'unset'
-stats.dom.style.right = '0'
-stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
-document.body.appendChild(stats.dom)
+const TICK_TIME = 400
+const BOARD_WIDTH = 30
+const BOARD_HEIGHT = 20
 
-// biome-ignore lint/style/noNonNullAssertion: canvas exists in HTML
-const canvas = document.querySelector('canvas')!
-const ctx = canvas.getContext('2d')
-canvas.width = BLOCK_SIZE * BOARD_WIDTH
-canvas.height = BLOCK_SIZE * BOARD_HEIGHT
+class Scene {
+  canvas: HTMLCanvasElement
+  ctx: CanvasRenderingContext2D
+  stats: Stats
+  nextTickTime = 0
+  game: Game = new Game(BOARD_WIDTH, BOARD_HEIGHT)
 
-ctx.scale(BLOCK_SIZE, BLOCK_SIZE)
+  constructor(canvasSelector: string) {
+    this.canvas = document.querySelector(canvasSelector)
+    this.ctx = this.canvas?.getContext('2d')
+    if (!this.ctx) {
+      const err = `Canvas context not found for selector: ${canvasSelector}`
+      alert(err)
+      throw new Error(err)
+    }
 
-const game = new Game(BOARD_WIDTH, BOARD_HEIGHT)
+    // Set canvas dimensions and scale for rendering
+    this.resizeCanvas()
 
-let nextTickTime = 0
-function update(time: number) {
-  stats.begin()
-  draw()
-  if (time > nextTickTime) {
-    nextTickTime = time + TICK_TIME
-    game.executeTick()
-  }
-  stats.end()
-  window.requestAnimationFrame(update)
-}
+    // Initialize stats.js for performance monitoring
+    this.stats = new Stats()
+    this.stats.dom.style.left = 'unset'
+    this.stats.dom.style.right = '0'
+    this.stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild(this.stats.dom)
 
-function draw() {
-  ctx.fillStyle = '#000'
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-  drawBoard(game.board)
-  game.pieces.forEach((piece) => drawPiece(piece))
-}
-
-function drawBoard(board: number[][]) {
-  ctx.fillStyle = 'yellow'
-  board.forEach((row, y) => {
-    row.forEach((cell, x) => {
-      if (cell === 1) {
-        ctx.fillRect(x, y, 1, 1)
+    // Initialize key bindings for player controls
+    document.addEventListener('keydown', (evt) => {
+      if (evt.key === 'ArrowDown') {
+        this.game.pieces[1].movePieceDown()
+      } else if (evt.key === 'ArrowLeft') {
+        this.game.pieces[1].movePieceLeft()
+      } else if (evt.key === 'ArrowRight') {
+        this.game.pieces[1].movePieceRight()
+      } else if (evt.key === 'ArrowUp') {
+        this.game.pieces[1].rotatePiece()
+      } else if (evt.key === 's') {
+        this.game.pieces[0].movePieceDown()
+      } else if (evt.key === 'a') {
+        this.game.pieces[0].movePieceLeft()
+      } else if (evt.key === 'd') {
+        this.game.pieces[0].movePieceRight()
+      } else if (evt.key === 'w') {
+        this.game.pieces[0].rotatePiece()
       }
     })
-  })
-}
 
-function drawPiece(piece: Piece) {
-  ctx.fillStyle = 'red'
-  piece.shape.forEach((row, y) => {
-    row.forEach((cell, x) => {
-      if (!cell) return
-      ctx.fillRect(piece.x + x, piece.y + y, 1, 1)
+    // Start the game loop
+    this.update(0)
+  }
+
+  update(time: number) {
+    this.stats.begin()
+    this.draw()
+    if (time > this.nextTickTime) {
+      this.nextTickTime = time + TICK_TIME
+      this.game.executeTick()
+    }
+    this.stats.end()
+    window.requestAnimationFrame((t) => this.update(t))
+  }
+
+  draw() {
+    this.ctx.fillStyle = '#000'
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+    this.drawBoard(this.game.board)
+    this.game.pieces.forEach((piece) => this.drawPiece(piece))
+  }
+
+  resizeCanvas() {
+    const width = window.innerWidth
+    const height = window.innerHeight
+    const size = Math.min(width / BOARD_WIDTH, height / BOARD_HEIGHT)
+    const blockSize = Math.floor(size)
+
+    this.canvas.width = blockSize * BOARD_WIDTH
+    this.canvas.height = blockSize * BOARD_HEIGHT
+    this.ctx.scale(blockSize, blockSize)
+  }
+
+  private drawBoard(board: number[][]) {
+    this.ctx.fillStyle = 'yellow'
+    board.forEach((row, y) => {
+      row.forEach((cell, x) => {
+        if (cell === 1) {
+          this.ctx.fillRect(x, y, 1, 1)
+        }
+      })
     })
-  })
+  }
+
+  private drawPiece(piece: Piece) {
+    this.ctx.fillStyle = 'red'
+    piece.shape.forEach((row, y) => {
+      row.forEach((cell, x) => {
+        if (!cell) return
+        this.ctx.fillRect(piece.x + x, piece.y + y, 1, 1)
+      })
+    })
+  }
 }
 
-function startGame() {
-  document.querySelector('#start').hidden = true
+const startButton: HTMLButtonElement = document.querySelector('#start')
+
+startButton.addEventListener('click', () => {
+  startButton.hidden = true
   const audio = new Audio(music)
   audio.loop = true
   audio.play()
-  update(0)
-  document.addEventListener('keydown', (evt) => {
-    if (evt.key === 'ArrowDown') {
-      game.pieces[1].movePieceDown()
-    } else if (evt.key === 'ArrowLeft') {
-      game.pieces[1].movePieceLeft()
-    } else if (evt.key === 'ArrowRight') {
-      game.pieces[1].movePieceRight()
-    } else if (evt.key === 'ArrowUp') {
-      game.pieces[1].rotatePiece()
-    } else if (evt.key === 's') {
-      game.pieces[0].movePieceDown()
-    } else if (evt.key === 'a') {
-      game.pieces[0].movePieceLeft()
-    } else if (evt.key === 'd') {
-      game.pieces[0].movePieceRight()
-    } else if (evt.key === 'w') {
-      game.pieces[0].rotatePiece()
-    }
-  })
-}
 
-document.querySelector('#start').addEventListener('click', startGame)
+  const scene = new Scene('canvas')
+
+  addEventListener('resize', () => {
+    scene.resizeCanvas()
+  })
+})

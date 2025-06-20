@@ -27,4 +27,11 @@ export class Game {
       }
     }
   }
+
+  // gameOver() {
+  //   alert('Game Over! Your pieces reached the top of the board.')
+  //   console.log('game over')
+  //   this.board = matrix(this.board_width, this.board_height)
+  //   this.pieces = [new Piece(this, 2), new Piece(this, this.board_width - 5)]
+  // }
 }

@@ -1,4 +1,3 @@
-import { BOARD_HEIGHT, BOARD_WIDTH } from './consts'
 import type { Game } from './Game'
 import { allShapes } from './piece_types'
 
@@ -51,18 +50,18 @@ export class Piece {
     }
 
     // Check right border
-    if (x + shape[0].length > BOARD_WIDTH) {
+    if (x + shape[0].length > this.game.board_width) {
       return false
     }
 
     // Check bottom border
-    if (y + shape.length > BOARD_HEIGHT) {
+    if (y + shape.length > this.game.board_height) {
       return false
     }
 
     // Check if the piece overlaps with existing blocks on the board
     // or with other pieces
-    const otherPieces = this.game.pieces.filter((p) => p !== this)
+    const otherPieces = this.game.pieces?.filter((p) => p !== this) || []
     return !shape.some((row, sy) => {
       return row.some((cell, sx) => {
         if (!cell) return false
@@ -97,5 +96,8 @@ export class Piece {
     this.x = this.startPosition
     this.y = 0
     this.shape = allShapes[Math.floor(Math.random() * allShapes.length)]
+    // if (!this.isPositionValid(this.x, this.y, this.shape)) {
+    //   this.game.gameOver()
+    // }
   }
 }
