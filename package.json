@@ -4,7 +4,7 @@
   "description": "The JavaScript template",
   "scripts": {
     "start": "parcel ./src/index.html",
-    "build": "parcel build ./src/index.html"
+    "build": "parcel build ./src/index.html --public-url /bitetris/"
   },
   "devDependencies": {
     "parcel": "^2.0.0",
