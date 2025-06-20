@@ -2,6 +2,7 @@ import '@/styles/main.css'
 import Stats from 'stats.js'
 import music from '@/assets/tetris.mp3'
 import { Game } from './Game'
+import { Keyboard } from './Keyboard'
 import type { Piece } from './Piece'
 
 const TICK_TIME = 400
@@ -14,6 +15,7 @@ class Scene {
   stats: Stats
   nextTickTime = 0
   game: Game = new Game(BOARD_WIDTH, BOARD_HEIGHT)
+  keyboard = new Keyboard(200, 100)
 
   constructor(canvasSelector: string) {
     this.canvas = document.querySelector(canvasSelector)
@@ -35,25 +37,23 @@ class Scene {
     document.body.appendChild(this.stats.dom)
 
     // Initialize key bindings for player controls
-    document.addEventListener('keydown', (evt) => {
-      if (evt.key === 'ArrowDown') {
-        this.game.pieces[1].movePieceDown()
-      } else if (evt.key === 'ArrowLeft') {
-        this.game.pieces[1].movePieceLeft()
-      } else if (evt.key === 'ArrowRight') {
-        this.game.pieces[1].movePieceRight()
-      } else if (evt.key === 'ArrowUp') {
-        this.game.pieces[1].rotatePiece()
-      } else if (evt.key === 's') {
-        this.game.pieces[0].movePieceDown()
-      } else if (evt.key === 'a') {
-        this.game.pieces[0].movePieceLeft()
-      } else if (evt.key === 'd') {
-        this.game.pieces[0].movePieceRight()
-      } else if (evt.key === 'w') {
-        this.game.pieces[0].rotatePiece()
-      }
-    })
+    this.keyboard.registerKey('w', () => this.game.pieces[0].rotatePiece())
+    this.keyboard.registerKey('a', () => this.game.pieces[0].movePieceLeft())
+    this.keyboard.registerKey('s', () => this.game.pieces[0].movePieceDown())
+    this.keyboard.registerKey('d', () => this.game.pieces[0].movePieceRight())
+
+    this.keyboard.registerKey('ArrowUp', () =>
+      this.game.pieces[1].rotatePiece(),
+    )
+    this.keyboard.registerKey('ArrowLeft', () =>
+      this.game.pieces[1].movePieceLeft(),
+    )
+    this.keyboard.registerKey('ArrowRight', () =>
+      this.game.pieces[1].movePieceRight(),
+    )
+    this.keyboard.registerKey('ArrowDown', () =>
+      this.game.pieces[1].movePieceDown(),
+    )
 
     // Start the game loop
     this.update(0)
@@ -61,11 +61,11 @@ class Scene {
 
   update(time: number) {
     this.stats.begin()
-    this.draw()
     if (time > this.nextTickTime) {
       this.nextTickTime = time + TICK_TIME
       this.game.executeTick()
     }
+    this.draw()
     this.stats.end()
     window.requestAnimationFrame((t) => this.update(t))
   }
