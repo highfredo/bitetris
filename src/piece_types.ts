@@ -1,14 +1,9 @@
 export const CUBE = [
   [1, 1],
   [1, 1],
-];
-
-export const SHAPE_I = [
-  [1],
-  [1],
-  [1],
-  [1],
 ]
+
+export const SHAPE_I = [[1], [1], [1], [1]]
 
 export const SHAPE_S = [
   [0, 1, 1],
@@ -21,20 +16,20 @@ export const SHAPE_Z = [
 ]
 
 export const SHAPE_L = [
-  [1,0],
-  [1,0],
-  [1,1],
+  [1, 0],
+  [1, 0],
+  [1, 1],
 ]
 
 export const SHAPE_J = [
-  [0,1],
-  [0,1],
-  [1,1],
+  [0, 1],
+  [0, 1],
+  [1, 1],
 ]
 
 export const SHAPE_T = [
-  [1,1,1],
-  [0,1,0],
+  [1, 1, 1],
+  [0, 1, 0],
 ]
 
 export const allShapes = [
@@ -44,5 +39,5 @@ export const allShapes = [
   SHAPE_Z,
   SHAPE_L,
   SHAPE_J,
-  SHAPE_T
+  SHAPE_T,
 ]

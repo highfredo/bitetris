@@ -1,21 +1,22 @@
 {
-  "name": "javascript",
-  "version": "1.0.0",
-  "description": "The JavaScript template",
+  "name": "bitetris",
+  "version": "0.0.1",
+  "description": "Two hands tetris",
+  "type": "module",
   "scripts": {
-    "start": "parcel ./src/index.html",
-    "build": "parcel build ./src/index.html --public-url /bitetris/"
+    "start": "vite",
+    "build": "vite build --base=/bitetris/",
+    "check": "biome check --write src"
   },
   "devDependencies": {
-    "parcel": "^2.0.0",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^7.2.0"
+    "@biomejs/biome": "2.0.0",
+    "@types/stats.js": "^0.17.4",
+    "stats.js": "0.17.0",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
   },
   "keywords": [
     "css",
     "javascript"
-  ],
-  "dependencies": {
-    "stats.js": "0.17.0"
-  }
+  ]
 }
