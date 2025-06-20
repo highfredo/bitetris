@@ -1,14 +1,15 @@
 import { BOARD_HEIGHT, BOARD_WIDTH } from './consts'
+import type { Game } from './Game'
 import { allShapes } from './piece_types'
 
 export class Piece {
   x: number = 0
   y: number = 0
-  shape
+  shape: number[][]
 
   constructor(
-    private board,
-    private startPosition
+    private game: Game,
+    private startPosition: number,
   ) {
     this.restart()
   }
@@ -43,7 +44,7 @@ export class Piece {
     }
   }
 
-  isPositionValid(x, y, shape) {
+  isPositionValid(x: number, y: number, shape: number[][]) {
     // Check left border
     if (x < 0) {
       return false
@@ -60,10 +61,22 @@ export class Piece {
     }
 
     // Check if the piece overlaps with existing blocks on the board
+    // or with other pieces
+    const otherPieces = this.game.pieces.filter((p) => p !== this)
     return !shape.some((row, sy) => {
       return row.some((cell, sx) => {
         if (!cell) return false
-        return this.board[y + sy][x + sx]
+        return (
+          this.game.board[y + sy][x + sx] ||
+          otherPieces.some((p) =>
+            p.shape.some((prow, psy) =>
+              prow.some(
+                (pcell, psx) =>
+                  pcell && p.x + psx === x + sx && p.y + psy === y + sy,
+              ),
+            ),
+          )
+        )
       })
     })
   }
@@ -74,15 +87,15 @@ export class Piece {
     this.shape.forEach((row, sy) => {
       row.forEach((cell, sx) => {
         if (!cell) return false
-        this.board[y + sy][x + sx] = 1
+        this.game.board[y + sy][x + sx] = 1
       })
     })
     this.restart()
   }
 
   restart() {
-    this.x = this.startPosition.x
-    this.y = this.startPosition.y
+    this.x = this.startPosition
+    this.y = 0
     this.shape = allShapes[Math.floor(Math.random() * allShapes.length)]
   }
 }
